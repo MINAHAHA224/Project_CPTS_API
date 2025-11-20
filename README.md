@@ -18,7 +18,7 @@
 
 ## 📖 Giới thiệu Đề tài
 
-**3TLap** là một dự án ứng dụng web được xây dựng cho môn học Lập trình Web, mô phỏng một hệ thống thương mại điện tử chuyên kinh doanh các sản phẩm laptop. Dự án không chỉ dừng lại ở các chức năng e-commerce cơ bản mà còn tích hợp một **trợ lý ảo Chatbot AI** nhằm nâng cao trải nghiệm người dùng, cung cấp hỗ trợ tư vấn sản phẩm 24/7.
+**3TLap** là một dự án API được xây dựng cho môn học Lập trình Ứng Dụng , mô phỏng một hệ thống thương mại điện tử chuyên kinh doanh các sản phẩm laptop. Dự án không chỉ dừng lại ở các chức năng e-commerce cơ bản mà còn tích hợp một **trợ lý ảo Chatbot AI** nhằm nâng cao trải nghiệm người dùng, cung cấp hỗ trợ tư vấn sản phẩm 24/7.
 
 **Mục tiêu chính của dự án:**
 

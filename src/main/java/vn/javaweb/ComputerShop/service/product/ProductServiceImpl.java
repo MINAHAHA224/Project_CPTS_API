@@ -152,9 +152,14 @@ public class ProductServiceImpl implements ProductService {
 
 
     @Override
-    public List<ProductRpDTO> getAllProductView() {
-        Pageable pageable = PageRequest.of(0, 10);
-        List<ProductEntity> allProduct = this.productRepository.findAll(pageable).getContent();
+    public List<ProductRpDTO> getAllProductView(String search) {
+        List<ProductEntity> allProduct =  new ArrayList<>();
+        if ( search == null ||search.isEmpty()){
+            allProduct = this.productRepository.findAll();
+        }else {
+            String searchText = search.trim();
+            allProduct = this.productRepository.findAllProductEntityByName(searchText);
+        }
         return allProduct.stream().map(
                 pd -> ProductRpDTO.builder()
                         .id(pd.getId())
@@ -165,6 +170,7 @@ public class ProductServiceImpl implements ProductService {
                         .build()
         ).collect(Collectors.toList());
     }
+
 
     @Override
     @Transactional

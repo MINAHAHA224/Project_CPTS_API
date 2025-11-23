@@ -13,7 +13,7 @@ public class WebConfig  implements WebMvcConfigurer {
         registry.addResourceHandler("resources/images/product/**")
                 .addResourceLocations("file:///D:/Android_FinalProject/images/product/");
 
-        registry.addResourceHandler("resources/images/avatar/**").
-                addResourceLocations("file:///D:/Android_FinalProject/images/avatar/");
+        registry.addResourceHandler("resources/images/profile/**").
+                addResourceLocations("file:///D:/Android_FinalProject/images/profile/");
     }
 }

@@ -16,6 +16,9 @@ public interface ProductRepository extends JpaRepository<ProductEntity, Long>, P
 
    void deleteProductEntityById ( Long id);
 
+   @Query("SELECT p FROM  ProductEntity p WHERE p.name LIKE %:name%")
+   List<ProductEntity> findAllProductEntityByName (String name);
+
    @Query("SELECT DISTINCT p.factory FROM ProductEntity p")
    List<String> findAllFactories();
 

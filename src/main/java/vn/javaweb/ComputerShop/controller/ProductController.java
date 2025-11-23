@@ -34,13 +34,15 @@ public class ProductController {
     private final MomoPayment momoPayment;
 
     @GetMapping("")
-    public ResponseEntity<ApiResponseT< List<ProductRpDTO>>> getProducts() {
-        List<ProductRpDTO> listResult = this.productService.getAllProductView();
+    public ResponseEntity<ApiResponseT< List<ProductRpDTO>>> getProducts(@RequestParam( name = "search" , required = false) String search) {
+        List<ProductRpDTO> listResult = this.productService.getAllProductView(search);
         return ResponseEntity.ok().body(ApiResponseT.<List<ProductRpDTO>>builder()
                 .status(HttpStatus.OK.value())
                 .data(listResult)
                 .build());
     }
+
+
 
     @GetMapping("/home")
     public ResponseEntity<ApiResponseT<Map<String, Object>>> getHomePageData() {

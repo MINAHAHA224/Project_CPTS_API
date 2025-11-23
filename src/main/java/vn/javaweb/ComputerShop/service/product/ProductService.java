@@ -28,7 +28,7 @@ import java.util.Optional;
      ProductUpdateRqDTO handleGetProductUpdate (Long id);
      ApiResponse handleCreateProduct (ProductCreateRqDTO productCreateRqDTO , MultipartFile file);
      ApiResponse handleUpdateProduct (ProductUpdateRqDTO productUpdateRqDTO , MultipartFile file);
-     List<ProductRpDTO> getAllProductView();
+     List<ProductRpDTO> getAllProductView(String search);
      ApiResponse handleDeleteProduct (Long id);
      ProductDetailRpDTO handleGetProductRpAdmin(Long id);
      ProductDetailRpDTO handleGetProductDetail(long id);

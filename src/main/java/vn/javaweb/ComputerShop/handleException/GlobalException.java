@@ -77,7 +77,7 @@ public class GlobalException {
     @ExceptionHandler(AuthException.class)
     public ResponseEntity<ErrorResponse>  handleAuthenticationException ( AuthException e , WebRequest webRequest){
         ErrorResponse  body = new ErrorResponse();
-        body.setStatus(HttpStatus.UNAUTHORIZED.value());
+        body.setStatus(HttpStatus.BAD_REQUEST.value());
         body.setMessage(e.getMessage());
 //        body.setMessage("Something went wrong, please contact support.");
         body.setError("Authentication error");

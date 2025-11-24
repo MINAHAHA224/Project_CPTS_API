@@ -6,15 +6,7 @@ import java.util.Collection;
 import java.util.Date;
 import java.util.List;
 
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
-import jakarta.persistence.JoinColumn;
-import jakarta.persistence.ManyToOne;
-import jakarta.persistence.OneToMany;
-import jakarta.persistence.OneToOne;
-import jakarta.persistence.Table;
+import jakarta.persistence.*;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.NotNull;
@@ -42,6 +34,9 @@ public class UserEntity  extends BaseIdEntity<Long> implements  UserDetails  {
     private String address;
     private String phone;
     private String avatar;
+
+    @Column(columnDefinition = "LONGTEXT")
+    private String faceData;
 
 
     @OneToMany(mappedBy = "user")

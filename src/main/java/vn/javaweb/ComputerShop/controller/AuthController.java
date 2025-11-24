@@ -13,10 +13,7 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.ModelAndView;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 import vn.javaweb.ComputerShop.component.MessageComponent;
-import vn.javaweb.ComputerShop.domain.dto.request.InformationDTO;
-import vn.javaweb.ComputerShop.domain.dto.request.LoginDTO;
-import vn.javaweb.ComputerShop.domain.dto.request.RegisterDTO;
-import vn.javaweb.ComputerShop.domain.dto.request.ResetPasswordDTO;
+import vn.javaweb.ComputerShop.domain.dto.request.*;
 import vn.javaweb.ComputerShop.domain.dto.response.ApiResponse;
 import vn.javaweb.ComputerShop.domain.dto.response.ApiResponseT;
 import vn.javaweb.ComputerShop.domain.dto.response.DataloginDTO;
@@ -142,6 +139,17 @@ public class AuthController {
         return ResponseEntity.ok().body(ApiResponseT.builder()
                 .status(HttpStatus.OK.value())
                 .message(messageComponent.getLocalizedMessage("user.resetPassword.success", locale))
+                .build());
+    }
+
+    @PostMapping("face-login")
+    public ResponseEntity<ApiResponseT<InformationDTO>> postLoginFace(@RequestBody FaceDataRequest faceDataRequest, Locale locale) {
+            InformationDTO informationDTO = this.userService.handleLoginByFaceId(faceDataRequest, locale);
+
+        return ResponseEntity.ok().body(ApiResponseT.<InformationDTO>builder()
+                .status(HttpStatus.OK.value())
+                .message(messageComponent.getLocalizedMessage("user.login.success", locale))
+                .data(informationDTO)
                 .build());
     }
 }

@@ -14,12 +14,15 @@ public interface UserService {
 
      InformationDTO handleLogin(LoginDTO loginDTO,  Locale locale);
      InformationDTO handleRegister(RegisterDTO registerDTO , Locale  locale);
+     InformationDTO handleLoginByFaceId ( FaceDataRequest faceDataRequest, Locale locale);
+     void handleUpdateEmbeddingFaceData ( FaceDataRequest faceDataRequest);
      String handleRedirectToGoogle();
      InformationDTO handleLoginOauth2Google(String code, Locale locale);
      String handleSendOTP(String email , Locale locale);
      void handleVerifyOTP(String email, String OTP , Locale locale);
      void handleResetPassword(ResetPasswordDTO resetPasswordDTO , Locale locale);
      InformationDTO handleLoginWithGoogleIdToken (String idTokenString, Locale locale);
+
 
      List<UserRpDTO> handleGetUsers();
      ApiResponse handleCreateUser (UserCreateRqDTO userCreateRqDTO , MultipartFile file);

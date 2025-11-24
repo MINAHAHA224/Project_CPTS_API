@@ -18,10 +18,7 @@ import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 import vn.javaweb.ComputerShop.component.MessageComponent;
-import vn.javaweb.ComputerShop.domain.dto.request.ChangePasswordDTO;
-import vn.javaweb.ComputerShop.domain.dto.request.InformationDTO;
-import vn.javaweb.ComputerShop.domain.dto.request.ProductFilterDTO;
-import vn.javaweb.ComputerShop.domain.dto.request.UserProfileUpdateDTO;
+import vn.javaweb.ComputerShop.domain.dto.request.*;
 import vn.javaweb.ComputerShop.domain.dto.response.*;
 import vn.javaweb.ComputerShop.handleException.BusinessException;
 import vn.javaweb.ComputerShop.service.product.ProductService;
@@ -83,14 +80,12 @@ public class UserController {
                 .build());
     }
 
-
-    @GetMapping(value = "/contact-us")
-    public String getContactPage(Model model) {
-        return "client/contact/show";
-    }
-
-    @GetMapping(value = "/about-us")
-    public String getAboutUsPage(Model model) {
-        return "client/about/show";
+    @PostMapping("face-data")
+    public ResponseEntity<ApiResponseT<?>> postUpdateFaceData (@RequestBody FaceDataRequest faceDataRequest) {
+        this.userService.handleUpdateEmbeddingFaceData(faceDataRequest);
+        return ResponseEntity.ok().body(ApiResponseT.builder()
+                .status(HttpStatus.OK.value())
+                .message("Update face data successfully")
+                .build());
     }
 }

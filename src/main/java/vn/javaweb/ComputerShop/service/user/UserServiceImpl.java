@@ -42,6 +42,7 @@ import vn.javaweb.ComputerShop.repository.user.RoleRepository;
 import vn.javaweb.ComputerShop.repository.user.UserOtpRepository;
 import vn.javaweb.ComputerShop.repository.user.UserRepository;
 import vn.javaweb.ComputerShop.service.upload.UploadService;
+import vn.javaweb.ComputerShop.utils.FaceIdUtils;
 import vn.javaweb.ComputerShop.utils.SecurityUtils;
 
 @Service
@@ -132,6 +133,63 @@ public class UserServiceImpl implements UserService {
                 .avatar(user.getAvatar())
                 .build();
 
+    }
+
+    @Override
+    public void handleUpdateEmbeddingFaceData(FaceDataRequest faceDataRequest) {
+        String email = SecurityUtils.getPrincipal();
+        UserEntity user = this.userRepository.findUserEntityByEmail(email).orElseThrow(
+                () -> new AuthException("User not found")
+        );
+        String embeddedCode = faceDataRequest.getEmbeddedFaceData();
+        if ( embeddedCode == null || embeddedCode.isEmpty() ) {
+            throw new AuthException("Error update embedding face data is null");
+        }
+
+        user.setFaceData(embeddedCode);
+        this.userRepository.save(user);
+    }
+
+
+    @Override
+    public InformationDTO handleLoginByFaceId(FaceDataRequest faceDataRequest, Locale locale) {
+        String embeddedCode = faceDataRequest.getEmbeddedFaceData();
+        if ( embeddedCode == null || embeddedCode.isEmpty() ) {
+            throw new AuthException("Error face data is null");
+        }
+
+        UserEntity bestMatchUser = null;
+        double bestMatchScore = Double.MAX_VALUE;
+
+        float[] vectorUserInput = FaceIdUtils.toVector(embeddedCode);
+        List<UserEntity> listUser = this.userRepository.findUserHaveFaceData();
+
+        for ( UserEntity user : listUser ) {
+            float [] vectorUserDb = FaceIdUtils.toVector(user.getFaceData());
+            double distance = FaceIdUtils.euclideanDistance(vectorUserInput, vectorUserDb);
+            if ( distance < bestMatchScore ) {
+                bestMatchUser = user;
+                bestMatchScore = distance;
+            }
+        }
+
+        double THRESHOLD = 0.9;
+
+        if (bestMatchUser == null ||  bestMatchScore > THRESHOLD){
+            throw new AuthException("Face not match");
+        }
+
+
+        String token = jwtUtils.generateToken(bestMatchUser.getId(), bestMatchUser.getEmail(), bestMatchUser.getRole().getName());
+
+        return InformationDTO.builder()
+                .id(bestMatchUser.getId())
+                .email(bestMatchUser.getEmail())
+                .fullName(bestMatchUser.getFullName())
+                .avatar(bestMatchUser.getAvatar())
+                .role(bestMatchUser.getRole().getName())
+                .tokenJWT(token)
+                .build();
     }
 
     @Override
@@ -537,6 +595,7 @@ public class UserServiceImpl implements UserService {
             throw new AuthException("Error verifying Google ID Token.");
         }
     }
+
 
     // Tách logic tìm hoặc tạo user ra một hàm riêng để tái sử dụng
     private UserEntity findOrCreateUser(String email, String name, String avatar) {

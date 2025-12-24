@@ -31,16 +31,16 @@ import vn.javaweb.ComputerShop.component.MessageComponent;
 import vn.javaweb.ComputerShop.domain.dto.request.*;
 import vn.javaweb.ComputerShop.domain.dto.response.*;
 import vn.javaweb.ComputerShop.domain.entity.*;
-import vn.javaweb.ComputerShop.handleException.AuthException;
-import vn.javaweb.ComputerShop.handleException.BusinessException;
-import vn.javaweb.ComputerShop.repository.auth.AuthMethodRepository;
-import vn.javaweb.ComputerShop.repository.cart.CartRepository;
-import vn.javaweb.ComputerShop.repository.order.OrderRepository;
-import vn.javaweb.ComputerShop.repository.product.ProductRepository;
-import vn.javaweb.ComputerShop.repository.user.RoleRepository;
-import vn.javaweb.ComputerShop.repository.user.UserOtpRepository;
-import vn.javaweb.ComputerShop.repository.user.UserRepository;
-import vn.javaweb.ComputerShop.service.AdminService;
+import vn.javaweb.ComputerShop.handleException.exceptions.AuthException;
+import vn.javaweb.ComputerShop.handleException.exceptions.BusinessException;
+import vn.javaweb.ComputerShop.repository.AuthMethodRepository;
+import vn.javaweb.ComputerShop.repository.CartRepository;
+import vn.javaweb.ComputerShop.repository.OrderRepository;
+import vn.javaweb.ComputerShop.repository.ProductRepository;
+import vn.javaweb.ComputerShop.repository.RoleRepository;
+import vn.javaweb.ComputerShop.repository.UserOtpRepository;
+import vn.javaweb.ComputerShop.repository.UserRepository;
+import vn.javaweb.ComputerShop.service.AdminUserService;
 import vn.javaweb.ComputerShop.service.UserService;
 import vn.javaweb.ComputerShop.service.UploadService;
 import vn.javaweb.ComputerShop.utils.FaceIdUtils;
@@ -49,7 +49,7 @@ import vn.javaweb.ComputerShop.utils.SecurityUtils;
 @Service
 @RequiredArgsConstructor
 @Slf4j
-public class UserServiceImpl implements UserService , AdminService {
+public class UserUserServiceImpl implements UserService , AdminUserService {
     private final UserRepository userRepository;
     private final RoleRepository roleRepository;
     private final CartRepository cartRepository;
@@ -403,7 +403,7 @@ public class UserServiceImpl implements UserService , AdminService {
     }
 
     @Override
-    public AccountDetailDTO handleGetAccountDetail(Long id) {
+    public AccountDetailDTO handleGetAccount(Long id) {
         UserEntity user = this.userRepository.findUserEntityById(id);
         if (user == null) {
             throw new AuthException("User not found");

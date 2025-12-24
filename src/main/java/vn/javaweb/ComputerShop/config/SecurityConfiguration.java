@@ -17,12 +17,9 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 
-import jakarta.servlet.DispatcherType;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
-import org.springframework.web.servlet.config.annotation.ResourceHandlerRegistry;
 import vn.javaweb.ComputerShop.component.JwtFilter;
-import vn.javaweb.ComputerShop.component.JwtUtils;
-import vn.javaweb.ComputerShop.repository.user.UserRepository;
+import vn.javaweb.ComputerShop.repository.UserRepository;
 
 @Configuration
 @EnableMethodSecurity(securedEnabled = true)
@@ -77,7 +74,7 @@ public class SecurityConfiguration {
                                 "/api/v1/orders/**",
                                 "/api/v1/users/**",
                                 "/api/v1/payment").hasRole("USER")
-                        .requestMatchers("/admin", "/admin/**").hasRole("ADMIN")
+                        .requestMatchers("/api/v1/admin/**" ).hasRole("ADMIN")
 
                         .anyRequest().permitAll());
 

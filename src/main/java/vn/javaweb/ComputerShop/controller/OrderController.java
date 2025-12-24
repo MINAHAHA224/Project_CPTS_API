@@ -1,20 +1,18 @@
 package vn.javaweb.ComputerShop.controller;
 
-import jakarta.servlet.http.HttpSession;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 import vn.javaweb.ComputerShop.component.MessageComponent;
 import vn.javaweb.ComputerShop.domain.dto.request.CartDetailsListDTO;
 import vn.javaweb.ComputerShop.domain.dto.response.ApiResponseT;
 import vn.javaweb.ComputerShop.domain.dto.response.CheckoutRpDTO;
 import vn.javaweb.ComputerShop.domain.dto.response.OrderRpDTO;
-import vn.javaweb.ComputerShop.service.cart.CartService;
-import vn.javaweb.ComputerShop.service.order.OrderService;
+import vn.javaweb.ComputerShop.service.CartService;
+import vn.javaweb.ComputerShop.service.OrderService;
 import vn.javaweb.ComputerShop.component.MomoPayment;
-import vn.javaweb.ComputerShop.service.product.ProductService;
+import vn.javaweb.ComputerShop.service.ProductService;
 
 import java.util.List;
 import java.util.Locale;

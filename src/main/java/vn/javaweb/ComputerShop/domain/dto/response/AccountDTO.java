@@ -8,7 +8,7 @@ import lombok.*;
 @NoArgsConstructor
 @Builder
 @ToString
-public class UserRpDTO {
+public class AccountDTO {
     private Long id;
     private String email;
     private String fullName;

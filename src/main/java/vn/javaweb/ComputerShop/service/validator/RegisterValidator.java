@@ -6,7 +6,7 @@ import jakarta.validation.ConstraintValidator;
 import jakarta.validation.ConstraintValidatorContext;
 import org.springframework.util.StringUtils;
 import vn.javaweb.ComputerShop.domain.dto.request.RegisterDTO;
-import vn.javaweb.ComputerShop.repository.user.UserRepository;
+import vn.javaweb.ComputerShop.repository.UserRepository;
 
 
 import java.util.regex.Pattern;

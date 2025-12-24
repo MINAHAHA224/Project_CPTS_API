@@ -7,9 +7,10 @@ import lombok.*;
 @NoArgsConstructor
 @AllArgsConstructor
 @ToString
-public class CountElementDTO {
-    private long countElementUser ;
-    private long countElementProduct ;
-    private long countElementOrder ;
+@Builder
+public class DashboardDTO {
+    private long numberUser ;
+    private long numberProduct ;
+    private long numberOrder ;
 
 }

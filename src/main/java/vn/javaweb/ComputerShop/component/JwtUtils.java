@@ -8,10 +8,8 @@ import io.jsonwebtoken.io.Decoders;
 import io.jsonwebtoken.security.Keys;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
-import vn.javaweb.ComputerShop.domain.dto.request.InformationDTO;
-import vn.javaweb.ComputerShop.handleException.BusinessException;
-import vn.javaweb.ComputerShop.repository.user.UserRepository;
-import vn.javaweb.ComputerShop.service.user.UserService;
+import vn.javaweb.ComputerShop.handleException.exceptions.BusinessException;
+import vn.javaweb.ComputerShop.repository.UserRepository;
 
 import java.security.Key;
 import java.util.Date;

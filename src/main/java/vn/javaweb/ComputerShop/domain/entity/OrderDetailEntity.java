@@ -31,7 +31,7 @@ public class OrderDetailEntity extends BaseIdEntity<Long> {
 
     // product_id : long
     @ManyToOne
-    @JoinColumn(name = "product_id")
+    @JoinColumn(name = "product_id" )
     private ProductEntity product;
 
 

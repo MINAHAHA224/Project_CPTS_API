@@ -1,4 +1,4 @@
-package vn.javaweb.ComputerShop.service.product;
+package vn.javaweb.ComputerShop.service.Impl;
 
 import java.util.*;
 import java.util.stream.Collectors;
@@ -16,17 +16,19 @@ import vn.javaweb.ComputerShop.domain.dto.request.*;
 import vn.javaweb.ComputerShop.domain.dto.response.*;
 import vn.javaweb.ComputerShop.domain.entity.CartDetailEntity;
 import vn.javaweb.ComputerShop.domain.entity.ProductEntity;
-import vn.javaweb.ComputerShop.handleException.NotFoundException;
-import vn.javaweb.ComputerShop.repository.cart.CartDetailRepository;
-import vn.javaweb.ComputerShop.repository.cart.CartRepository;
-import vn.javaweb.ComputerShop.repository.product.ProductRepository;
-import vn.javaweb.ComputerShop.service.upload.UploadService;
-import vn.javaweb.ComputerShop.domain.dto.response.ApiResponse;
+import vn.javaweb.ComputerShop.handleException.exceptions.BusinessException;
+import vn.javaweb.ComputerShop.handleException.exceptions.NotFoundException;
+import vn.javaweb.ComputerShop.repository.CartDetailRepository;
+import vn.javaweb.ComputerShop.repository.CartRepository;
+import vn.javaweb.ComputerShop.repository.ProductRepository;
+import vn.javaweb.ComputerShop.service.AdminProductService;
+import vn.javaweb.ComputerShop.service.ProductService;
+import vn.javaweb.ComputerShop.service.UploadService;
 
 
 @Service
 @RequiredArgsConstructor
-public class ProductServiceImpl implements ProductService {
+public class ProductServiceImpl implements ProductService , AdminProductService {
     private final ProductRepository productRepository;
     private final CartRepository cartRepository;
     private final CartDetailRepository cartDetailRepository;
@@ -55,9 +57,10 @@ public class ProductServiceImpl implements ProductService {
         result.setTotalPage(listProduct.getTotalPages());
         return result;
     }
+
+
     @Override
-    public ProductFilterAdRpDTO handleShowDataProductAdmin(Optional<String> pageOptional) {
-        ProductFilterAdRpDTO result = new ProductFilterAdRpDTO();
+    public ProductFilterAdRpDTO handleGetProducts(Optional<String> pageOptional) {
         int page = 1;
         try {
             if (pageOptional.isPresent()) {
@@ -71,11 +74,13 @@ public class ProductServiceImpl implements ProductService {
         }
         Pageable pageable = PageRequest.of(page - 1, 5);
         Page<ProductAdRpDTO> listProducts = this.productRepository.findProducts(pageable);
-        result.setListProduct(listProducts.getContent());
-        result.setPage(page);
-        result.setTotalPage(listProducts.getTotalPages());
-        return result;
+        return ProductFilterAdRpDTO.builder()
+                .listProduct(listProducts.getContent())
+                .page(page)
+                .totalPage(listProducts.getTotalPages())
+                .build();
     }
+
 
     @Override
     public ProductUpdateRqDTO handleGetProductUpdate(Long id) {
@@ -98,14 +103,12 @@ public class ProductServiceImpl implements ProductService {
 
     }
     @Override
-    @Transactional
-    public ApiResponse handleCreateProduct (ProductCreateRqDTO productCreateRqDTO , MultipartFile file){
+    public void handleCreateProduct (ProductCreateRqDTO productCreateRqDTO , MultipartFile file , Locale locale){
         String avatarProduct = this.uploadService.handleUploadFile(file, "product");
         boolean checkExistName = this.productRepository.existsProductEntityByName(productCreateRqDTO.getName().trim());
         if ( checkExistName){
-            return new ApiResponse(500 ,"Admin : Tên sản phẩm đã được sử dụng" );
+            throw new BusinessException(messageComponent.getLocalizedMessage("admin.product.create.name.exist", locale));
         }
-
         ProductEntity newProduct = ProductEntity.builder()
                 .name(productCreateRqDTO.getName().trim())
                 .price(productCreateRqDTO.getPrice())
@@ -117,19 +120,16 @@ public class ProductServiceImpl implements ProductService {
                 .image(avatarProduct)
                 .sold(0)
                 .build();
-        // handle save
         this.productRepository.save(newProduct);
-        return new ApiResponse(200 ,"Tạo sản phẩm thành công" );
     }
 
     @Override
-    @Transactional
-    public ApiResponse handleUpdateProduct (ProductUpdateRqDTO productUpdateRqDTO , MultipartFile file){
+    public void handleUpdateProduct (ProductUpdateRqDTO productUpdateRqDTO , MultipartFile file  , Locale locale){
         ProductEntity currentProduct = this.productRepository.findProductEntityById(productUpdateRqDTO.getId());
         if ( !currentProduct.getName().equals(productUpdateRqDTO.getName())){
             boolean checkExistName = this.productRepository.existsProductEntityByName(productUpdateRqDTO.getName().trim());
             if ( checkExistName){
-                return new ApiResponse(500 , "Admin : Tên sản phẩm đã được sử dụng");
+                throw  new BusinessException(messageComponent.getLocalizedMessage("admin.product.create.name.exist" , locale));
             }
         }
 
@@ -146,8 +146,6 @@ public class ProductServiceImpl implements ProductService {
         currentProduct.setTarget(productUpdateRqDTO.getFactory());
         currentProduct.setSold(productUpdateRqDTO.getSold());
         this.productRepository.save(currentProduct);
-
-        return new ApiResponse(200 , "Admin : Cập nhật sản phẩm thành công");
     }
 
 
@@ -173,19 +171,16 @@ public class ProductServiceImpl implements ProductService {
 
 
     @Override
-    @Transactional
-    public ApiResponse handleDeleteProduct (Long id){
+    public void handleDeleteProduct (Long id){
         ProductEntity product = this.productRepository.findProductEntityById(id);
         if (product == null){
             throw new NotFoundException("Product not found");
         }
         this.productRepository.deleteProductEntityById(id);
-        return new ApiResponse(200 ,"Admin : Xóa sản phẩn thành công" );
-
     }
 
     @Override
-    public ProductDetailRpDTO handleGetProductRpAdmin(Long id) {
+    public ProductDetailRpDTO handleGetProduct(Long id) {
         ProductEntity product = this.productRepository.findProductEntityById(id);
         if (product == null) {
             throw new NotFoundException("Product not found");

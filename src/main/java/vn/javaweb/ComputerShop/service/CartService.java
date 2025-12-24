@@ -1,4 +1,4 @@
-    package vn.javaweb.ComputerShop.service.cart;
+    package vn.javaweb.ComputerShop.service;
 
     import vn.javaweb.ComputerShop.domain.dto.request.InfoOrderRqDTO;
     import vn.javaweb.ComputerShop.domain.dto.response.CartRpDTO;

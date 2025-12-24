@@ -1,10 +1,11 @@
-package vn.javaweb.ComputerShop.repository.auth;
+package vn.javaweb.ComputerShop.repository.custom;
 
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
 import org.springframework.stereotype.Repository;
 import vn.javaweb.ComputerShop.domain.entity.AuthMethodEntity;
 import vn.javaweb.ComputerShop.domain.entity.UserEntity;
+import vn.javaweb.ComputerShop.repository.AuthMethodRepositoryCustom;
 
 import java.time.LocalDateTime;
 

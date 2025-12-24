@@ -1,33 +1,22 @@
 package vn.javaweb.ComputerShop.controller;
 
 import jakarta.servlet.http.HttpServletResponse;
-import jakarta.servlet.http.HttpSession;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.ui.Model;
-import org.springframework.validation.BindingResult;
-import org.springframework.validation.FieldError;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.servlet.ModelAndView;
-import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 import vn.javaweb.ComputerShop.component.MessageComponent;
 import vn.javaweb.ComputerShop.domain.dto.request.*;
-import vn.javaweb.ComputerShop.domain.dto.response.ApiResponse;
 import vn.javaweb.ComputerShop.domain.dto.response.ApiResponseT;
-import vn.javaweb.ComputerShop.domain.dto.response.DataloginDTO;
-import vn.javaweb.ComputerShop.handleException.BusinessException;
-import vn.javaweb.ComputerShop.service.product.ProductService;
-import vn.javaweb.ComputerShop.service.user.UserService;
+import vn.javaweb.ComputerShop.handleException.exceptions.BusinessException;
+import vn.javaweb.ComputerShop.service.UserService;
 
 import java.io.IOException;
 import java.util.Locale;
 
-import java.util.List;
 import java.util.Map;
-import com.google.gson.Gson; // Thêm thư viện này
-import org.springframework.http.MediaType; // Thêm thư viện này
+
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("${api.prefix.auth}")

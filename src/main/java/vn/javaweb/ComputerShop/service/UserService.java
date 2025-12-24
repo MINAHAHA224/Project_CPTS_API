@@ -1,14 +1,10 @@
-package vn.javaweb.ComputerShop.service.user;
+package vn.javaweb.ComputerShop.service;
 
-import jakarta.servlet.http.HttpSession;
 import org.springframework.web.multipart.MultipartFile;
-import org.springframework.web.servlet.ModelAndView;
 import vn.javaweb.ComputerShop.domain.dto.request.*;
 import vn.javaweb.ComputerShop.domain.dto.response.*;
 
-import java.util.List;
 import java.util.Locale;
-import java.util.Map;
 
 public interface UserService {
 
@@ -24,12 +20,8 @@ public interface UserService {
      InformationDTO handleLoginWithGoogleIdToken (String idTokenString, Locale locale);
 
 
-     List<UserRpDTO> handleGetUsers();
-     ApiResponse handleCreateUser (UserCreateRqDTO userCreateRqDTO , MultipartFile file);
-     UserDetailDTO handleGetUserDetail (Long id);
+
      UserUpdateRqDTO handleShowDataUserUpdate (Long id );
-     ApiResponse handleUpdateUser (UserUpdateRqDTO userUpdateRqDTO , MultipartFile file);
-     ApiResponse handleDeleteUser (Long id);
      UserProfileUpdateDTO handleGetDataUserToProfile ();
      void handleUpdateProfile ( UserProfileUpdateDTO userProfileUpdateDTO , Locale locale);
      void handleUpdateAvatar (MultipartFile avatarFile , Locale locale );

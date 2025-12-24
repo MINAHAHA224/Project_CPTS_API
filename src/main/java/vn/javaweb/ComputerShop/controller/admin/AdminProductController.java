@@ -1,11 +1,13 @@
 package vn.javaweb.ComputerShop.controller.admin;
 
 import java.util.List;
+import java.util.Locale;
 import java.util.Optional;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.stereotype.Controller;
+import org.apache.coyote.Response;
+import org.springframework.http.ResponseEntity;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
@@ -14,11 +16,14 @@ import org.springframework.validation.FieldError;
 
 import jakarta.validation.Valid;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
+import vn.javaweb.ComputerShop.component.MessageComponent;
 import vn.javaweb.ComputerShop.domain.dto.request.ProductCreateRqDTO;
 import vn.javaweb.ComputerShop.domain.dto.request.ProductUpdateRqDTO;
+import vn.javaweb.ComputerShop.domain.dto.response.ApiResponseT;
 import vn.javaweb.ComputerShop.domain.dto.response.ProductDetailRpDTO;
 import vn.javaweb.ComputerShop.domain.dto.response.ProductFilterAdRpDTO;
 import vn.javaweb.ComputerShop.domain.dto.response.ApiResponse;
+import vn.javaweb.ComputerShop.service.AdminProductService;
 import vn.javaweb.ComputerShop.service.ProductService;
 
 import vn.javaweb.ComputerShop.utils.ConstantVariable;
@@ -26,135 +31,75 @@ import vn.javaweb.ComputerShop.utils.SecurityUtils;
 
 @RestController
 @RequiredArgsConstructor
-@RequestMapping(value = "${api.prefix.merchandise}")
+@RequestMapping(value = "${api.prefix.admin.product}")
 @Slf4j
-public class MerchandiseController {
+public class AdminProductController {
     private final ProductService productService;
+    private final MessageComponent messageComponent;
+    private final AdminProductService adminProductService;
 
 
-    @GetMapping("/admin/product")
-    public String getAllProduct(Model model, @RequestParam("page") Optional<String> pageOptional) {
+    @GetMapping("/")
+    public ResponseEntity<ApiResponseT<ProductFilterAdRpDTO>> getProducts(Locale locale, @RequestParam("page") Optional<String> pageOptional) {
         log.info(ConstantVariable.ADMIN_PRODUCT + "Start getAllProduct at {} ", SecurityUtils.currentTime);
-
-        ProductFilterAdRpDTO result = this.productService.handleShowDataProductAdmin(pageOptional);
-        model.addAttribute("listProduct", result.getListProduct());
-        model.addAttribute("currentPage", result.getPage());
-        model.addAttribute("totalPages", result.getTotalPage());
-
+        ProductFilterAdRpDTO result = this.adminProductService.handleGetProducts(pageOptional);
         log.info(ConstantVariable.ADMIN_PRODUCT + "End getAllProduct at {} ", SecurityUtils.currentTime);
-        return "admin/product/show";
+        return ResponseEntity.ok().body(ApiResponseT.<ProductFilterAdRpDTO>builder()
+                .status(200)
+                .message(messageComponent.getLocalizedMessage("admin.product.get.all.success", locale))
+                .data(result)
+                .build());
     }
 
-    // Create product not update
 
-    @GetMapping("/admin/product/create")
-    public String getCreateProduct(Model model) {
-        log.info(ConstantVariable.ADMIN_PRODUCT + "Start getCreateProduct at {} ", SecurityUtils.currentTime);
-        model.addAttribute("productCreateRqDTO", new ProductCreateRqDTO());
-        log.info(ConstantVariable.ADMIN_PRODUCT + "End getCreateProduct at {} ", SecurityUtils.currentTime);
-        return "admin/product/create";
-    }
-
-    @PostMapping("/admin/product/create")
-    public String postCreateProduct(Model model, @Valid @ModelAttribute("productCreateRqDTO") ProductCreateRqDTO productCreateRqDTO,
-                                    BindingResult bindingResult,
-                                    @RequestParam("avatarFile") MultipartFile file) {
+    @PostMapping("")
+    public ResponseEntity<ApiResponseT<?>> createProduct(Locale locale, @Valid @RequestBody ProductCreateRqDTO productCreateRqDTO,
+                                                         @RequestParam("avatarFile") MultipartFile file) {
         log.info(ConstantVariable.ADMIN_PRODUCT + "Start postCreateProduct at {} ", SecurityUtils.currentTime);
-        List<FieldError> errors = bindingResult.getFieldErrors();
-
-
-        if (bindingResult.hasErrors()) {
-            log.warn(ConstantVariable.ADMIN_PRODUCT + "Validation failed at {} ", SecurityUtils.currentTime);
-            for (FieldError error : errors) {
-                log.warn(">>>> {} - {} ", error.getField(), error.getDefaultMessage());
-            }
-            model.addAttribute("productCreateRqDTO", productCreateRqDTO);
-            log.info(ConstantVariable.ADMIN_PRODUCT + "End postCreateProduct at {} ", SecurityUtils.currentTime);
-            return "admin/product/create";
-        }
-
-
-        ApiResponse response = this.productService.handleCreateProduct(productCreateRqDTO, file);
-        if (response.getStatus() == 200) {
-            model.addAttribute("messageSuccess", response.getMessage());
-            model.addAttribute("productCreateRqDTO", new ProductCreateRqDTO());
-            log.info(ConstantVariable.ADMIN_PRODUCT + "End success postCreateProduct at {} ", SecurityUtils.currentTime);
-            return "admin/product/create";
-        } else {
-            model.addAttribute("messageError", response.getMessage());
-            model.addAttribute("productCreateRqDTO", productCreateRqDTO);
-            log.info(ConstantVariable.ADMIN_PRODUCT + "End error postCreateProduct at {} ", SecurityUtils.currentTime);
-            return "admin/product/create";
-        }
-
-
+        this.adminProductService.handleCreateProduct(productCreateRqDTO, file, locale);
+        return ResponseEntity.ok().body(ApiResponseT.<ProductFilterAdRpDTO>builder()
+                .status(200)
+                .message(messageComponent.getLocalizedMessage("admin.product.create.success", locale))
+                .build());
     }
 
-    // Product detail
-    @GetMapping("/admin/product/{id}")
-    public String getProductDetail(Model model, @PathVariable("id") Long id) {
+
+    @GetMapping("/{id}")
+    public ResponseEntity<ApiResponseT<ProductDetailRpDTO>> getProduct(Locale locale, @PathVariable("id") Long id) {
         log.info(ConstantVariable.ADMIN_PRODUCT + "Start getProductDetail at {} - with productId : {} ", SecurityUtils.currentTime, id);
-        ProductDetailRpDTO productDetail = this.productService.handleGetProductRpAdmin(id);
-        model.addAttribute("product", productDetail);
+        ProductDetailRpDTO productDetail = this.adminProductService.handleGetProduct(id);
         log.info(ConstantVariable.ADMIN_PRODUCT + "End getProductDetail at {} ", SecurityUtils.currentTime);
-        return "admin/product/detail";
+        return ResponseEntity.ok().body(ApiResponseT.<ProductDetailRpDTO>builder()
+                .status(200)
+                .message(messageComponent.getLocalizedMessage("admin.product.get.detail.success", locale))
+                .data(productDetail)
+                .build());
     }
 
     // product update
-    @GetMapping("/admin/product/update/{id}")
-    public String getProductUpdate(Model model, @PathVariable("id") Long id) {
-        log.info(ConstantVariable.ADMIN_PRODUCT + "Start getProductUpdate at {} - with productId : {} ", SecurityUtils.currentTime, id);
-        ProductUpdateRqDTO productUpdateRqDTO = this.productService.handleGetProductUpdate(id);
-        model.addAttribute("productUpdateRqDTO", productUpdateRqDTO);
-        log.info(ConstantVariable.ADMIN_PRODUCT + "End getProductUpdate at {} ", SecurityUtils.currentTime);
-        return "admin/product/update";
-    }
 
-    @PostMapping("/admin/product/update")
-    public String postProductUpdate(Model model, @Valid @ModelAttribute("productUpdateRqDTO") ProductUpdateRqDTO productUpdateRqDTO,
-                                    BindingResult bindingResult, RedirectAttributes redirectAttributes,
-                                    @RequestParam("avatarFile") MultipartFile file) {
+
+    @PatchMapping("/{id}")
+    public ResponseEntity<ApiResponseT<?>> updateProduct(Locale locale, @Valid @RequestBody ProductUpdateRqDTO productUpdateRqDTO,
+                                                         @RequestParam("avatarFile") MultipartFile file) {
         log.info(ConstantVariable.ADMIN_PRODUCT + "Start postProductUpdate at {} - with productId : {} ", SecurityUtils.currentTime, productUpdateRqDTO.getId());
-        List<FieldError> errors = bindingResult.getFieldErrors();
-
-
-        if (bindingResult.hasErrors()) {
-            log.warn(ConstantVariable.ADMIN_PRODUCT + "Validation failed at {} ", SecurityUtils.currentTime);
-            for (FieldError error : errors) {
-                log.warn(">>>> {} - {} ", error.getField(), error.getDefaultMessage());
-            }
-            model.addAttribute("productUpdateRqDTO", productUpdateRqDTO);
-            log.info(ConstantVariable.ADMIN_PRODUCT + "End postProductUpdate at {} ", SecurityUtils.currentTime);
-            return "admin/product/update";
-        }
-        ApiResponse response = this.productService.handleUpdateProduct(productUpdateRqDTO, file);
-        if (response.getStatus() == 200) {
-            redirectAttributes.addFlashAttribute("messageSuccess", response.getMessage());
-            log.info(ConstantVariable.ADMIN_PRODUCT + "End success postProductUpdate at {} ", SecurityUtils.currentTime);
-            return "redirect:/admin/product";
-        } else {
-            model.addAttribute("messageError", response.getMessage());
-            model.addAttribute("productUpdateRqDTO", productUpdateRqDTO);
-            log.info(ConstantVariable.ADMIN_PRODUCT + "End error postProductUpdate at {} ", SecurityUtils.currentTime);
-            return "admin/product/update";
-        }
+        this.adminProductService.handleUpdateProduct(productUpdateRqDTO, file, locale);
+        return ResponseEntity.ok().body(ApiResponseT.<ProductDetailRpDTO>builder()
+                .status(200)
+                .message(messageComponent.getLocalizedMessage("admin.product.update.success", locale))
+                .build());
 
     }
 
-    // product delete
 
-    @GetMapping("/admin/product/delete/{id}")
-    public String getDeleteProduct(Model model, @PathVariable("id") Long id, RedirectAttributes redirectAttributes) {
+    @DeleteMapping("/{id}")
+    public ResponseEntity<ApiResponseT<?>> getDeleteProduct(Locale locale, @PathVariable("id") Long id) {
         log.info(ConstantVariable.ADMIN_PRODUCT + "Start getDeleteProduct at {} - with productId : {} ", SecurityUtils.currentTime, id);
-        ApiResponse deleteProduct = this.productService.handleDeleteProduct(id);
-        if (deleteProduct.getStatus() == 200) {
-            redirectAttributes.addFlashAttribute("messageSuccess", deleteProduct.getMessage());
-        } else {
-            redirectAttributes.addFlashAttribute("messageError", deleteProduct.getMessage());
-        }
-        log.info(ConstantVariable.ADMIN_PRODUCT + "End getDeleteProduct at {}  ", SecurityUtils.currentTime);
-
-        return "redirect:/admin/product";
+        this.adminProductService.handleDeleteProduct(id);
+        return ResponseEntity.ok().body(ApiResponseT.<ProductDetailRpDTO>builder()
+                .status(200)
+                .message(messageComponent.getLocalizedMessage("admin.product.delete.success", locale))
+                .build());
     }
 
 

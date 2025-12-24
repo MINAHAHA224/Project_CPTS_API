@@ -1,4 +1,4 @@
-package vn.javaweb.ComputerShop.repository.product;
+package vn.javaweb.ComputerShop.repository;
 
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;

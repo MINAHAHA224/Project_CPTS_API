@@ -6,13 +6,15 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.validation.FieldError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.context.request.WebRequest;
 import vn.javaweb.ComputerShop.domain.dto.response.ErrorResponse;
 import vn.javaweb.ComputerShop.domain.dto.response.ValidationError;
+import vn.javaweb.ComputerShop.handleException.exceptions.AuthException;
+import vn.javaweb.ComputerShop.handleException.exceptions.BusinessException;
+import vn.javaweb.ComputerShop.handleException.exceptions.NotFoundException;
 
 import java.util.List;
 

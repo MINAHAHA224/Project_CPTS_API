@@ -2,28 +2,21 @@ package vn.javaweb.ComputerShop.controller;
 
 import java.util.*;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-import jakarta.servlet.http.HttpSession;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
-import org.springframework.ui.Model;
-import org.springframework.validation.BindingResult;
-import org.springframework.validation.FieldError;
 import org.springframework.web.bind.annotation.*;
 
-import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.web.multipart.MultipartFile;
-import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 import vn.javaweb.ComputerShop.component.MessageComponent;
 import vn.javaweb.ComputerShop.domain.dto.request.*;
 import vn.javaweb.ComputerShop.domain.dto.response.*;
-import vn.javaweb.ComputerShop.handleException.BusinessException;
-import vn.javaweb.ComputerShop.service.product.ProductService;
-import vn.javaweb.ComputerShop.service.upload.UploadService;
-import vn.javaweb.ComputerShop.service.user.UserService;
+import vn.javaweb.ComputerShop.handleException.exceptions.BusinessException;
+import vn.javaweb.ComputerShop.service.ProductService;
+import vn.javaweb.ComputerShop.service.UploadService;
+import vn.javaweb.ComputerShop.service.UserService;
 
 @Controller
 @RequiredArgsConstructor

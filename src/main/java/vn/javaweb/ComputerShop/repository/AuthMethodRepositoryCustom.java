@@ -1,4 +1,4 @@
-package vn.javaweb.ComputerShop.repository.auth;
+package vn.javaweb.ComputerShop.repository;
 
 import vn.javaweb.ComputerShop.domain.entity.AuthMethodEntity;
 import vn.javaweb.ComputerShop.domain.entity.UserEntity;

@@ -1,22 +1,26 @@
 package vn.javaweb.ComputerShop.controller.admin;
 
 import java.util.List;
+import java.util.Locale;
 
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.cglib.core.Local;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.validation.BindingResult;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.ModelAttribute;
-import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.*;
 import org.springframework.ui.Model;
-import org.springframework.web.bind.annotation.PostMapping;
 
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
+import vn.javaweb.ComputerShop.component.MessageComponent;
 import vn.javaweb.ComputerShop.domain.dto.request.OrderUpdateRqDTO;
+import vn.javaweb.ComputerShop.domain.dto.response.ApiResponseT;
 import vn.javaweb.ComputerShop.domain.dto.response.OrderRpDTO;
 import vn.javaweb.ComputerShop.domain.dto.response.ApiResponse;
+import vn.javaweb.ComputerShop.service.AdminOrderService;
 import vn.javaweb.ComputerShop.service.OrderService;
 import vn.javaweb.ComputerShop.utils.ConstantVariable;
 import vn.javaweb.ComputerShop.utils.SecurityUtils;
@@ -25,89 +29,57 @@ import vn.javaweb.ComputerShop.utils.SecurityUtils;
 @Controller
 @RequiredArgsConstructor
 @Slf4j
-public class PurchaseController {
+@RequestMapping(value = "${api.prefix.admin.order}")
+public class AdminOrderController {
 
     private final OrderService orderService;
+    private final MessageComponent messageComponent;
+    private final AdminOrderService adminOrderService;
 
-
-    @GetMapping("/admin/order")
-    public String getAllOrder(Model model) {
-
+    @GetMapping("/")
+    public ResponseEntity<ApiResponseT<List<OrderRpDTO>>> getOrders(Locale locale) {
         log.info(ConstantVariable.ADMIN_ORDER + "Start getAllOrder at = {} ", SecurityUtils.currentTime);
-
-        List<OrderRpDTO> orders = this.orderService.handleGetOrderAd();
-        model.addAttribute("orders", orders);
-
+        List<OrderRpDTO> data = this.adminOrderService.handleGetOrders();
         log.info(ConstantVariable.ADMIN_ORDER + "End getAllOrder at = {} ", SecurityUtils.currentTime);
-        return "admin/order/show";
+        return ResponseEntity.ok().body(ApiResponseT.<List<OrderRpDTO>>builder()
+                .status(HttpStatus.OK.value())
+                .message(messageComponent.getLocalizedMessage("admin.order.get.all.success", locale))
+                .data(data)
+                .build());
     }
 
-    @GetMapping("/admin/order/{id}")
-    public String getOrderDetail(Model model, @PathVariable long id) {
+    @GetMapping("/{id}")
+    public ResponseEntity<ApiResponseT<OrderRpDTO>> getOrder(Locale locale, @PathVariable("id") long id) {
         log.info(ConstantVariable.ADMIN_ORDER + "Start getOrderDetail at {} -  with orderId = {}   ", SecurityUtils.currentTime, id);
-
-        OrderRpDTO order = this.orderService.handeGetOrderDetailAd(id);
-        model.addAttribute("order", order);
-
+        OrderRpDTO order = this.adminOrderService.handeGetOrder(id);
         log.info(ConstantVariable.ADMIN_ORDER + "End getOrderDetail at {} ", SecurityUtils.currentTime);
-        return "admin/order/detail";
+        return ResponseEntity.ok().body(ApiResponseT.<OrderRpDTO>builder()
+                .status(HttpStatus.OK.value())
+                .message(messageComponent.getLocalizedMessage("admin.order.get.detail.success", locale))
+                .data(order)
+                .build());
     }
 
-    @GetMapping("/admin/order/update/{id}")
-    public String getUpdateOrderPage(Model model, @PathVariable long id) {
-        log.info(ConstantVariable.ADMIN_ORDER + "Start getUpdateOrderPage at {} - with orderId {}  ", SecurityUtils.currentTime, id);
-        OrderUpdateRqDTO orders = this.orderService.handleGetOrderRqAd(id);
-        model.addAttribute("orders", orders);
-        log.info(ConstantVariable.ADMIN_ORDER + "End getUpdateOrderPage at {} ", SecurityUtils.currentTime);
 
-        return "admin/order/update";
+    @PatchMapping("/{id}")
+    public ResponseEntity<ApiResponseT<?>> updateOrder(Locale locale
+            , @Valid @RequestBody OrderUpdateRqDTO orderView) {
+        this.adminOrderService.handleUpdateOrder(orderView);
+        return ResponseEntity.ok().body(ApiResponseT.builder()
+                .status(HttpStatus.OK.value())
+                .message(messageComponent.getLocalizedMessage("admin.order.update.success", locale))
+                .build());
     }
 
-    @PostMapping("/admin/order/update")
-    public String postUpdateOrderPage(Model model
-            , @Valid @ModelAttribute("orders") OrderUpdateRqDTO orderView
-            , BindingResult bindingResult, RedirectAttributes redirectAttributes) {
-
-        log.info(ConstantVariable.ADMIN_ORDER + "Start postUpdateOrderPage at {} - with orderId {}  ", SecurityUtils.currentTime, orderView.getId());
-        if (bindingResult.hasErrors()) {
-            log.warn(ConstantVariable.ADMIN_ORDER + "Validation failed at {} - with orderId = {} ", SecurityUtils.currentTime, orderView.getId());
-            model.addAttribute("orders", orderView);
-            log.info(ConstantVariable.ADMIN_ORDER + "End postUpdateOrderPage at {} ", SecurityUtils.currentTime);
-            return "admin/order/update";
-        }
-
-        ApiResponse response = this.orderService.handleUpdateOrderRqAd(orderView);
-        if (response.getStatus() != 200) {
-            log.error(ConstantVariable.ADMIN_ORDER + "Update failed at {} - orderId = {} ", SecurityUtils.currentTime, orderView.getId());
-            model.addAttribute("orders", orderView);
-            model.addAttribute("messageError", response.getMessage());
-            log.info(ConstantVariable.ADMIN_ORDER + "End error postUpdateOrderPage at {} ", SecurityUtils.currentTime);
-            return "admin/order/update";
-        } else {
-            redirectAttributes.addFlashAttribute("messageSuccess", response.getMessage());
-            log.info(ConstantVariable.ADMIN_ORDER + "Update success at {} - orderId = {} ", SecurityUtils.currentTime, orderView.getId());
-            log.info(ConstantVariable.ADMIN_ORDER + "End success postUpdateOrderPage at {} ", SecurityUtils.currentTime);
-            return "redirect:/admin/order";
-        }
-
-
-    }
-
-    @GetMapping("/admin/order/delete/{id}")
-    public String getDeleteOrderPage(Model model, @PathVariable long id, RedirectAttributes redirectAttributes) {
+    @DeleteMapping("/{id}")
+    public ResponseEntity<ApiResponseT<?>> getDeleteOrderPage(Locale locale, @PathVariable("id") long id) {
         log.info(ConstantVariable.ADMIN_ORDER + "Start getDeleteOrderPage at {} - orderId = {} ", SecurityUtils.currentTime, id);
-        ApiResponse handleDelete = this.orderService.handleDeleteOrder(id);
-        if (handleDelete.getStatus() != 200) {
-            log.error(ConstantVariable.ADMIN_ORDER + "Delete failed getDeleteOrderPage at {} - orderId = {} ", SecurityUtils.currentTime, id);
-            redirectAttributes.addFlashAttribute("messageError", handleDelete.getMessage());
-        } else {
-            log.info(ConstantVariable.ADMIN_ORDER + "Delete success getDeleteOrderPage at {} - orderId = {} ", SecurityUtils.currentTime, id);
-
-            redirectAttributes.addFlashAttribute("messageSuccess", handleDelete.getMessage());
-        }
+        this.adminOrderService.handleDeleteOrder(id);
         log.info(ConstantVariable.ADMIN_ORDER + "End getDeleteOrderPage at {} ", SecurityUtils.currentTime);
-        return "redirect:/admin/order";
-
+        return ResponseEntity.ok().body(ApiResponseT.builder()
+                .status(HttpStatus.OK.value())
+                .message(messageComponent.getLocalizedMessage("admin.order.delete.success", locale))
+                .build());
     }
 
 }

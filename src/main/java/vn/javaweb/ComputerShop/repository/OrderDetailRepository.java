@@ -1,4 +1,4 @@
-package vn.javaweb.ComputerShop.repository.order;
+package vn.javaweb.ComputerShop.repository;
 
 import java.util.List;
 

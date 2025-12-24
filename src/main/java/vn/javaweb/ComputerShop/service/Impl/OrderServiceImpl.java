@@ -1,4 +1,4 @@
-package vn.javaweb.ComputerShop.service.order;
+package vn.javaweb.ComputerShop.service.Impl;
 
 
 import java.util.List;
@@ -9,30 +9,29 @@ import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
-import jakarta.servlet.http.HttpSession;
 import org.springframework.transaction.annotation.Transactional;
 import vn.javaweb.ComputerShop.component.MailerComponent;
 import vn.javaweb.ComputerShop.component.MessageComponent;
-import vn.javaweb.ComputerShop.domain.dto.request.InfoOrderRqDTO;
 import vn.javaweb.ComputerShop.domain.dto.request.OrderUpdateRqDTO;
 import vn.javaweb.ComputerShop.domain.dto.request.momo.MomoRpDTO;
 import vn.javaweb.ComputerShop.domain.dto.response.OrderDetailRpDTO;
 import vn.javaweb.ComputerShop.domain.dto.response.OrderRpDTO;
-import vn.javaweb.ComputerShop.domain.dto.response.ApiResponse;
 import vn.javaweb.ComputerShop.domain.entity.*;
 import vn.javaweb.ComputerShop.domain.enums.CartStatus;
 import vn.javaweb.ComputerShop.domain.enums.PaymentStatus;
-import vn.javaweb.ComputerShop.handleException.AuthException;
-import vn.javaweb.ComputerShop.handleException.BusinessException;
-import vn.javaweb.ComputerShop.handleException.NotFoundException;
-import vn.javaweb.ComputerShop.repository.cart.CartRepository;
-import vn.javaweb.ComputerShop.repository.order.OrderRepository;
-import vn.javaweb.ComputerShop.repository.user.UserRepository;
+import vn.javaweb.ComputerShop.handleException.exceptions.AuthException;
+import vn.javaweb.ComputerShop.handleException.exceptions.BusinessException;
+import vn.javaweb.ComputerShop.handleException.exceptions.NotFoundException;
+import vn.javaweb.ComputerShop.repository.CartRepository;
+import vn.javaweb.ComputerShop.repository.OrderRepository;
+import vn.javaweb.ComputerShop.repository.UserRepository;
+import vn.javaweb.ComputerShop.service.AdminOrderService;
+import vn.javaweb.ComputerShop.service.OrderService;
 import vn.javaweb.ComputerShop.utils.SecurityUtils;
 
 @Service
 @RequiredArgsConstructor
-public class OrderServiceImpl implements OrderService {
+public class OrderServiceImpl implements OrderService , AdminOrderService {
 
     private final OrderRepository orderRepository;
     private final UserRepository userRepository;
@@ -73,7 +72,7 @@ public class OrderServiceImpl implements OrderService {
         return listResult;
     }
     @Override
-    public List<OrderRpDTO> handleGetOrderAd() {
+    public List<OrderRpDTO> handleGetOrders() {
         List<OrderEntity> listEntity = this.orderRepository.findAll();
         return listEntity.stream().map(
                 od ->
@@ -90,7 +89,7 @@ public class OrderServiceImpl implements OrderService {
     }
 
     @Override
-    public OrderRpDTO handeGetOrderDetailAd(Long id) {
+    public OrderRpDTO handeGetOrder(Long id) {
         OrderEntity orderEntity = this.orderRepository.findOrderEntityById(id);
         if ( orderEntity == null ){
             throw new NotFoundException("Order not found");
@@ -142,8 +141,8 @@ public class OrderServiceImpl implements OrderService {
 
 
     @Override
-    @Transactional
-    public ApiResponse handleUpdateOrderRqAd(OrderUpdateRqDTO orderUpdateRqDTO) {
+
+    public void handleUpdateOrder(OrderUpdateRqDTO orderUpdateRqDTO) {
         OrderEntity order = this.orderRepository.findOrderEntityById(orderUpdateRqDTO.getId());
         if ( order == null ){
             throw new NotFoundException("Order not found");
@@ -154,18 +153,15 @@ public class OrderServiceImpl implements OrderService {
         order.setReceiverAddress(orderUpdateRqDTO.getReceiverAddress());
         order.setStatusPayment(orderUpdateRqDTO.getStatusPayment());
         this.orderRepository.save(order);
-        return new ApiResponse(200 ,"Admin : Cập nhật trạng đơn đặt hàng thành công" );
     }
 
     @Override
-    @Transactional
-    public ApiResponse handleDeleteOrder(Long id) {
+    public void handleDeleteOrder(Long id) {
         Optional<OrderEntity> orderOpt = orderRepository.findById(id);
         if (orderOpt.isEmpty()) {
             throw new NotFoundException("Không tìm thấy đơn hàng với ID: " + id);
         }
         this.orderRepository.deleteOrderEntityById(id);
-        return new ApiResponse(200 ,"Admin : Xóa đơn hàng thành công" );
     }
 
     @Override

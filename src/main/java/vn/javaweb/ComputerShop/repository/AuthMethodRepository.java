@@ -1,4 +1,4 @@
-package vn.javaweb.ComputerShop.repository.auth;
+package vn.javaweb.ComputerShop.repository;
 
 
 import org.springframework.data.jpa.repository.JpaRepository;

@@ -1,4 +1,4 @@
-package vn.javaweb.ComputerShop.service.export;
+package vn.javaweb.ComputerShop.service;
 
 import jakarta.servlet.http.HttpServletResponse;
 import vn.javaweb.ComputerShop.domain.dto.request.InformationDTO;

@@ -1,4 +1,4 @@
-package vn.javaweb.ComputerShop.repository.product;
+package vn.javaweb.ComputerShop.repository.custom;
 
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
@@ -10,6 +10,7 @@ import org.springframework.stereotype.Repository;
 import vn.javaweb.ComputerShop.domain.dto.request.ProductFilterDTO;
 import vn.javaweb.ComputerShop.domain.dto.response.ProductAdRpDTO;
 import vn.javaweb.ComputerShop.domain.dto.response.ProductRpDTO;
+import vn.javaweb.ComputerShop.repository.ProductRepositoryCustom;
 
 import java.util.ArrayList;
 import java.util.List;

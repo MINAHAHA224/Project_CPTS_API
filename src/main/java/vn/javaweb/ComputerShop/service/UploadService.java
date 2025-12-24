@@ -1,4 +1,4 @@
-package vn.javaweb.ComputerShop.service.upload;
+package vn.javaweb.ComputerShop.service;
 
 import java.io.BufferedOutputStream;
 import java.io.File;

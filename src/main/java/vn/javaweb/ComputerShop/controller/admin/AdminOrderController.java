@@ -17,7 +17,7 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 import vn.javaweb.ComputerShop.domain.dto.request.OrderUpdateRqDTO;
 import vn.javaweb.ComputerShop.domain.dto.response.OrderRpDTO;
 import vn.javaweb.ComputerShop.domain.dto.response.ApiResponse;
-import vn.javaweb.ComputerShop.service.order.OrderService;
+import vn.javaweb.ComputerShop.service.OrderService;
 import vn.javaweb.ComputerShop.utils.ConstantVariable;
 import vn.javaweb.ComputerShop.utils.SecurityUtils;
 
@@ -25,7 +25,7 @@ import vn.javaweb.ComputerShop.utils.SecurityUtils;
 @Controller
 @RequiredArgsConstructor
 @Slf4j
-public class AdminOrderController {
+public class PurchaseController {
 
     private final OrderService orderService;
 

@@ -1,4 +1,4 @@
-package vn.javaweb.ComputerShop.service.user;
+package vn.javaweb.ComputerShop.service.Impl;
 
 import java.time.LocalDateTime;
 import java.util.*;
@@ -8,7 +8,6 @@ import com.google.api.client.googleapis.auth.oauth2.GoogleIdToken;
 import com.google.api.client.googleapis.auth.oauth2.GoogleIdTokenVerifier;
 import com.google.api.client.http.javanet.NetHttpTransport;
 import com.google.api.client.json.gson.GsonFactory;
-import jakarta.servlet.http.HttpSession;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
@@ -25,7 +24,6 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.MultiValueMap;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.multipart.MultipartFile;
-import org.springframework.web.servlet.ModelAndView;
 import vn.javaweb.ComputerShop.component.GoogleOauth2;
 import vn.javaweb.ComputerShop.component.JwtUtils;
 import vn.javaweb.ComputerShop.component.MailerComponent;
@@ -33,22 +31,25 @@ import vn.javaweb.ComputerShop.component.MessageComponent;
 import vn.javaweb.ComputerShop.domain.dto.request.*;
 import vn.javaweb.ComputerShop.domain.dto.response.*;
 import vn.javaweb.ComputerShop.domain.entity.*;
-import vn.javaweb.ComputerShop.domain.enums.CartStatus;
 import vn.javaweb.ComputerShop.handleException.AuthException;
 import vn.javaweb.ComputerShop.handleException.BusinessException;
 import vn.javaweb.ComputerShop.repository.auth.AuthMethodRepository;
 import vn.javaweb.ComputerShop.repository.cart.CartRepository;
+import vn.javaweb.ComputerShop.repository.order.OrderRepository;
+import vn.javaweb.ComputerShop.repository.product.ProductRepository;
 import vn.javaweb.ComputerShop.repository.user.RoleRepository;
 import vn.javaweb.ComputerShop.repository.user.UserOtpRepository;
 import vn.javaweb.ComputerShop.repository.user.UserRepository;
-import vn.javaweb.ComputerShop.service.upload.UploadService;
+import vn.javaweb.ComputerShop.service.AdminService;
+import vn.javaweb.ComputerShop.service.UserService;
+import vn.javaweb.ComputerShop.service.UploadService;
 import vn.javaweb.ComputerShop.utils.FaceIdUtils;
 import vn.javaweb.ComputerShop.utils.SecurityUtils;
 
 @Service
 @RequiredArgsConstructor
 @Slf4j
-public class UserServiceImpl implements UserService {
+public class UserServiceImpl implements UserService , AdminService {
     private final UserRepository userRepository;
     private final RoleRepository roleRepository;
     private final CartRepository cartRepository;
@@ -56,6 +57,8 @@ public class UserServiceImpl implements UserService {
     private final AuthenticationManager authenticationManager;
     private final AuthMethodRepository authMethodRepository;
     private final UserOtpRepository userOtpRepository;
+    private final ProductRepository productRepository;
+    private final OrderRepository orderRepository;
     private final MailerComponent mailerComponent;
     private final UploadService uploadService;
     private final MessageComponent messageComponent;
@@ -355,10 +358,10 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public List<UserRpDTO> handleGetUsers() {
+    public List<AccountDTO> handleGetAccounts() {
         List<UserEntity> listEntity = this.userRepository.findAll();
         return listEntity.stream().map(us ->
-                UserRpDTO.builder()
+                AccountDTO.builder()
                         .id(us.getId())
                         .email(us.getEmail())
                         .fullName(us.getFullName())
@@ -369,9 +372,7 @@ public class UserServiceImpl implements UserService {
 
 
     @Override
-    @Transactional
-    public ApiResponse handleCreateUser(UserCreateRqDTO userCreateRqDTO, MultipartFile file) {
-
+    public void handleCreateAccount(UserCreateRqDTO userCreateRqDTO, MultipartFile file , Locale locale) {
         String email = userCreateRqDTO.getEmail().trim();
         String address = userCreateRqDTO.getAddress().trim();
         String phone = userCreateRqDTO.getPhone().trim();
@@ -379,16 +380,16 @@ public class UserServiceImpl implements UserService {
         String avatar = this.uploadService.handleUploadFile(file, "avatar");
         String hashPassword = this.passwordEncoder.encode(userCreateRqDTO.getPassword());
         RoleEntity role = this.roleRepository.findRoleEntityByName(userCreateRqDTO.getRoleName());
-        // handle check email and password
+
         boolean checkEmailExist = this.userRepository.existsUserEntityByEmail(email);
         if (checkEmailExist) {
-            return new ApiResponse(500, "Admin : email đã có tài khoản sử dụng");
+            throw new BusinessException(messageComponent.getLocalizedMessage("admin.user.create.error.emailExists", locale));
         }
         boolean checkExistPhone = this.userRepository.existsUserEntityByPhone(phone);
         if (checkExistPhone) {
-            return new ApiResponse(500, "Admin : Số tài khoản đã được sử dụng");
+            throw new BusinessException(messageComponent.getLocalizedMessage("admin.user.create.error.phoneExists", locale));
         }
-        // save user
+
         UserEntity user = UserEntity.builder()
                 .email(email)
                 .address(address)
@@ -399,17 +400,15 @@ public class UserServiceImpl implements UserService {
                 .role(role)
                 .build();
         this.userRepository.save(user);
-        return new ApiResponse(200, "Admin : tạo tài khoản thành công");
-
     }
 
     @Override
-    public UserDetailDTO handleGetUserDetail(Long id) {
+    public AccountDetailDTO handleGetAccountDetail(Long id) {
         UserEntity user = this.userRepository.findUserEntityById(id);
         if (user == null) {
             throw new AuthException("User not found");
         }
-        return UserDetailDTO.builder()
+        return AccountDetailDTO.builder()
                 .id(user.getId())
                 .email(user.getEmail())
                 .fullName(user.getFullName())
@@ -440,8 +439,7 @@ public class UserServiceImpl implements UserService {
 
 
     @Override
-    @Transactional
-    public ApiResponse handleUpdateUser(UserUpdateRqDTO userUpdateRqDTO, MultipartFile file) {
+    public void handleUpdateAccount(AccountDetailDTO userUpdateRqDTO, MultipartFile file , Locale locale) {
         UserEntity userCurrent = this.userRepository.findUserEntityById(userUpdateRqDTO.getId());
         if (userCurrent == null) {
             throw new AuthException("User not found");
@@ -450,12 +448,10 @@ public class UserServiceImpl implements UserService {
         RoleEntity role = this.roleRepository.findRoleEntityByName(userUpdateRqDTO.getRoleName().trim());
         String phone = userUpdateRqDTO.getPhone().trim();
 
-        // handle check phone
         boolean checkExistPhone = this.userRepository.existsUserEntityByPhone(phone);
         if (checkExistPhone) {
-            return new ApiResponse(500, "Admin : Số điện thoại đã được sử dụng");
+            throw  new BusinessException(messageComponent.getLocalizedMessage("admin.user.update.error.phoneExists", locale) );
         }
-        // set data new
         userCurrent.setFullName(userUpdateRqDTO.getFullName());
         userCurrent.setAddress(userUpdateRqDTO.getAddress());
         userCurrent.setPhone(userUpdateRqDTO.getPhone());
@@ -465,19 +461,18 @@ public class UserServiceImpl implements UserService {
             userCurrent.setAvatar(newAvatar);
         }
         this.userRepository.save(userCurrent);
-        return new ApiResponse(200, "Admin : Cập nhật tài khoản người dùng thành công");
+
     }
 
 
     @Override
-    @Transactional
-    public ApiResponse handleDeleteUser(Long id) {
+
+    public void handleDeleteAccount(Long id) {
         UserEntity user = this.userRepository.findUserEntityById(id);
         if (user != null) {
             throw new AuthException("User not found");
         }
         this.userRepository.deleteUserEntityById(id);
-        return new ApiResponse(200, "Admin : Xóa tài khoản thành công");
     }
 
     @Override
@@ -621,5 +616,20 @@ public class UserServiceImpl implements UserService {
         }
     }
 
+
+
+    // admin
+    public DashboardDTO handleGetDashboard ( ){
+
+        long countUser = this.userRepository.count();
+        long countProduct = this.productRepository.count();
+        long countOrder = this.orderRepository.count();
+        return DashboardDTO.builder()
+                .numberUser(countUser)
+                .numberProduct(countProduct)
+                .numberOrder(countOrder)
+                .build();
+
+    }
 
 }
